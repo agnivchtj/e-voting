@@ -1,7 +1,8 @@
 
 const { Wallets, Gateway } = require('fabric-network');
-const { buildWallet, buildCCPOrg1, buildCCPOrg2 } = require('../../test-application/javascript/AppUtil');
+const { createWallet, createCCPOrg } = require('../appSetup');
 const path = require('path');
+
 
 async function closeElection(walletDetails, ccpPath, user_ID, electionName) {
     try {
@@ -35,7 +36,7 @@ async function closeElection(walletDetails, ccpPath, user_ID, electionName) {
 }
 
 
-async function main() {
+async function run() {
     const user_ID = process.argv[2];
     const CA_admin = process.argv[3];
     const electionName = process.argv[4];
@@ -53,8 +54,8 @@ async function main() {
             process.exit(1);
         }
 
-        const ccp = (CA_admin == 'org1') ? buildCCPOrg1() : buildCCPOrg2();
-        const wallet = await buildWallet(Wallets, path.join(__dirname, 'wallet/' + CA_admin));
+        const ccp = createCCPOrg(CA_admin);
+        const wallet = await createWallet(Wallets, path.join(__dirname, 'wallet/' + CA_admin));
         await closeElection(wallet, ccp, user_ID, electionName);
 
     } catch (error) {
@@ -63,4 +64,4 @@ async function main() {
     }
 }
 
-main();
+run();

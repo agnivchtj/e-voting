@@ -11,7 +11,7 @@ std::string createElection(
     std::string candidate_one, std::string candidate_two, std::string candidate_three, 
     shim_ctx_ptr_t ctx
 );
-std::string queryElection(
+election_t queryElection(
     std::string election_name, shim_ctx_ptr_t ctx
 );
 std::string submitVote(

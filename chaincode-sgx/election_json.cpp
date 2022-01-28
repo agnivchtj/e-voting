@@ -1,5 +1,6 @@
 #include "parson.h"
 #include "election_json.h"
+#include "struct_mapping/struct_mapping.h"
 
 // Unmarshal
 void unmarshal_election(election_t* election, const char* json_bytes, uint32_t json_len)
@@ -9,8 +10,18 @@ void unmarshal_election(election_t* election, const char* json_bytes, uint32_t j
     election->candidate_one = json_object_get_string(json_object(root), "candidate_one");
     election->candidate_two = json_object_get_string(json_object(root), "candidate_two");
     election->candidate_three = json_object_get_string(json_object(root), "candidate_three");
+    election->organizer = json_object_get_string(json_object(root), "organizer");
     election->winner = json_object_get_string(json_object(root), "winner");
-    election->status = json_object_get_boolean(json_object(root), "status");
+    election->num_votes = json_object_get_number(json_object(root), "num_votes");
+    election->status = json_object_get_string(json_object(root), "status");
+    json_value_free(root);
+    return 1;
+}
+
+void unmarshal_hash(hash_t* hash_vote, const char* json_bytes, uint32_t json_len) 
+{
+    JSON_Value* root = json_parse_string(json_bytes);
+    hash_vote->hash = json_object_get_string(json_object(root), "hash");
     json_value_free(root);
     return 1;
 }
@@ -42,8 +53,22 @@ std::string marshal_election(election_t* election)
     json_object_set_string(root_object, "candidate_one", election->candidate_one.c_str());
     json_object_set_string(root_object, "candidate_two", election->candidate_two.c_str());
     json_object_set_string(root_object, "candidate_three", election->candidate_three.c_str());
+    json_object_set_string(root_object, "organizer", election->organizer.c_str());
     json_object_set_string(root_object, "winner", election->winner.c_str());
-    json_object_set_boolean(root_object, "status", election->status);
+    json_object_set_number(root_object, "num_votes", election->num_votes);
+    json_object_set_string(root_object, "status", election->status.c_str());
+    char* serialized_string = json_serialize_to_string(root_value);
+    std::string out(serialized_string);
+    json_free_serialized_string(serialized_string);
+    json_value_free(root_value);
+    return out;
+}
+
+std::string marshal_hash(hash_t* hashVote) 
+{
+    JSON_Value* root_value = json_value_init_object();
+    JSON_Object* root_object = json_value_get_object(root_value);
+    json_object_set_string(root_object, "hash", hashVote->hash.c_str());
     char* serialized_string = json_serialize_to_string(root_value);
     std::string out(serialized_string);
     json_free_serialized_string(serialized_string);

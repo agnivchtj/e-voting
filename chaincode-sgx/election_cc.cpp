@@ -67,8 +67,10 @@ std::string createElection(
     // create new election
     election_t new_election;
     new_election.name = (char*)election_name.c_str();
+    new_election.organizer = get_creator_name('org1msp', (uint8_t*)election_name.c_str(), election_name.size(), ctx)
     new_election.winner = "";
-    new_election.status = true;
+    new_election.num_votes = 0;
+    new_election.status = "open";
 
     // Create the candidates
     new_election.candidate_one = (char*)candidate_one.c_str();
@@ -82,7 +84,7 @@ std::string createElection(
     return OK;
 }
 
-std::string queryElection(std::string election_name, shim_ctx_ptr_t ctx) 
+election_t queryElection(std::string election_name, shim_ctx_ptr_t ctx) 
 {
     // check if election already exists
     uint32_t election_bytes_len = 0;
@@ -102,11 +104,10 @@ std::string queryElection(std::string election_name, shim_ctx_ptr_t ctx)
         "Election - Name: (%s) Candidates: (%s, %s, %s) Status (%d)", 
         election.name.c_str(), 
         election.candidate_one.c_str(), election.candidate_two.c_str(), election.candidate_three.c_str(), 
-        election.winner.c_str(), 
         election.status
     );
 
-    return OK;
+    return election;
 }
 
 std::string submitVote(
@@ -222,7 +223,11 @@ std::string queryVote(std::string election_name, std::string voter_name, shim_ct
         // Vote found
         if (vote.vote_from == voter_name) 
         {
-            LOG_DEBUG("Vote - Voter: %s, Vote to: %s", vote.vote_from.c_str(), vote.vote_to.c_str());
+            LOG_DEBUG(
+                "Vote - Voter: %s, Vote to: %s", 
+                vote.vote_from.c_str(), 
+                vote.vote_to.c_str()
+            );
             return OK;
         }
     }
